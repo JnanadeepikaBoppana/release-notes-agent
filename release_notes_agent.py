@@ -67,21 +67,38 @@ def fetch_merged_prs(
     token: str | None = None,
     max_prs: int = 300,
 ) -> list[dict[str, Any]]:
-    """Fetch merged PRs for `repo` merged between `since` and `until` (YYYY-MM-DD)."""
+    """Fetch merged PRs for `repo` merged between `since` and `until` (YYYY-MM-DD).
+
+    Uses the paginated /pulls endpoint and filters on merged_at client-side.
+    The /search/issues endpoint supports date qualifiers directly but rejects
+    some otherwise-valid queries with HTTP 422, so it is not used here.
+    """
     headers = {"Accept": "application/vnd.github+json"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
 
-    query = f"repo:{repo} is:pr is:merged merged:{since}..{until}"
+    since_dt = datetime.fromisoformat(since).replace(tzinfo=timezone.utc)
+    until_dt = datetime.fromisoformat(until).replace(
+        tzinfo=timezone.utc
+    ) + timedelta(days=1)
+
     prs: list[dict[str, Any]] = []
     page = 1
+    max_pages = 15
+    empty_streak = 0
 
-    while len(prs) < max_prs:
+    while page <= max_pages and len(prs) < max_prs:
         try:
             resp = requests.get(
-                f"{GITHUB_API}/search/issues",
+                f"{GITHUB_API}/repos/{repo}/pulls",
                 headers=headers,
-                params={"q": query, "per_page": 100, "page": page},
+                params={
+                    "state": "closed",
+                    "sort": "updated",
+                    "direction": "desc",
+                    "per_page": 100,
+                    "page": page,
+                },
                 timeout=30,
             )
         except requests.RequestException as exc:
@@ -90,16 +107,35 @@ def fetch_merged_prs(
                 "Check your network, or run offline with "
                 "--input sample_prs.json"
             ) from exc
-        if resp.status_code == 403 and "rate limit" in resp.text.lower():
+
+        if resp.status_code == 404:
             raise RuntimeError(
-                "GitHub rate limit hit. Set GITHUB_TOKEN for a higher quota."
+                f"Repository '{repo}' not found. Check the owner/name spelling, "
+                "and note that private repos need a GITHUB_TOKEN."
             )
-        resp.raise_for_status()
-        items = resp.json().get("items", [])
+        if resp.status_code in (403, 429):
+            raise RuntimeError(
+                "GitHub rate limit hit (60 requests/hour without a token).\n"
+                "Wait an hour, or set GITHUB_TOKEN for 5,000/hour."
+            )
+        if not resp.ok:
+            raise RuntimeError(
+                f"GitHub returned HTTP {resp.status_code}: {resp.text[:200]}"
+            )
+
+        items = resp.json()
         if not items:
             break
 
+        matched = 0
         for item in items:
+            merged_at = item.get("merged_at")
+            if not merged_at:
+                continue  # closed but never merged
+            merged_dt = datetime.fromisoformat(merged_at.replace("Z", "+00:00"))
+            if not (since_dt <= merged_dt < until_dt):
+                continue
+            matched += 1
             prs.append(
                 {
                     "number": item["number"],
@@ -108,12 +144,20 @@ def fetch_merged_prs(
                     "url": item["html_url"],
                     "labels": [lbl["name"] for lbl in item.get("labels", [])],
                     "body": (item.get("body") or "")[:600],
+                    "merged_at": merged_at,
                 }
             )
+
+        # Results are ordered by last update, not merge date, so a page with no
+        # matches is not proof we are past the window. Give it a few pages.
+        empty_streak = empty_streak + 1 if matched == 0 else 0
+        if empty_streak >= 3:
+            break
         if len(items) < 100:
             break
         page += 1
 
+    prs.sort(key=lambda p: p["number"])
     return prs[:max_prs]
 
 

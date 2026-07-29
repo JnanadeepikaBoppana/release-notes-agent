@@ -78,6 +78,25 @@ and falls back to a regex extraction of the outermost array before giving up.
 and CI tweaks are hidden unless `--include-internal` is passed, because the
 audience for release notes is users, not the repo's own maintainers.
 
+## Measured run
+
+Against a live repository, keyword classifier only, no LLM key:
+
+```
+$ python release_notes_agent.py --repo facebook/react --days 30 --no-llm
+Fetching merged PRs for facebook/react (2026-06-29 to 2026-07-29)...
+Found 74 merged PRs.
+Wrote RELEASE_NOTES.md (93 lines).
+Processed 74 PRs in 10.22s.
+Manual baseline: 185 min (2.5 min/PR).
+Automated: 0.17 min. Reduction: 99.9%.
+```
+
+The runtime is measured. The manual baseline is an estimate at 2.5 minutes per
+PR (read the diff, decide whether it is user-facing, rewrite the title) and is
+configurable via `--minutes-per-pr`. Treat the reduction figure as an
+order-of-magnitude claim, not a benchmark.
+
 ## Sample output
 
 ```markdown
