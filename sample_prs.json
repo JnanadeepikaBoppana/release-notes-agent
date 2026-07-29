@@ -1,0 +1,114 @@
+[
+  {
+    "number": 1204,
+    "title": "feat(billing): add support for annual subscription plans",
+    "author": "priya-n",
+    "url": "https://github.com/example/app/pull/1204",
+    "labels": ["feature", "billing"],
+    "body": "Adds annual plan selection to the checkout flow with prorated upgrades."
+  },
+  {
+    "number": 1207,
+    "title": "fix: resolve crash when uploading files over 50MB",
+    "author": "dmitri-k",
+    "url": "https://github.com/example/app/pull/1207",
+    "labels": ["bug"],
+    "body": "The multipart handler ran out of memory on large uploads. Now streams to disk."
+  },
+  {
+    "number": 1211,
+    "title": "chore(deps): bump requests from 2.28.1 to 2.31.0",
+    "author": "dependabot",
+    "url": "https://github.com/example/app/pull/1211",
+    "labels": ["dependencies"],
+    "body": "Automated dependency update."
+  },
+  {
+    "number": 1213,
+    "title": "perf: reduce dashboard load time by caching aggregate queries",
+    "author": "sam-oyelaran",
+    "url": "https://github.com/example/app/pull/1213",
+    "labels": ["enhancement", "performance"],
+    "body": "Dashboard p95 went from 3.2s to 0.9s by caching the rollup query for 60s."
+  },
+  {
+    "number": 1216,
+    "title": "feat!: remove deprecated /v1/reports endpoint",
+    "author": "priya-n",
+    "url": "https://github.com/example/app/pull/1216",
+    "labels": ["feature", "breaking-change"],
+    "body": "BREAKING: /v1/reports is removed. Consumers must migrate to /v2/reports."
+  },
+  {
+    "number": 1218,
+    "title": "docs: document the webhook retry policy",
+    "author": "lena-m",
+    "url": "https://github.com/example/app/pull/1218",
+    "labels": ["documentation"],
+    "body": "Adds a page explaining exponential backoff and the 24h retry window."
+  },
+  {
+    "number": 1221,
+    "title": "fix(auth): session no longer expires early on Safari",
+    "author": "dmitri-k",
+    "url": "https://github.com/example/app/pull/1221",
+    "labels": ["bug", "auth"],
+    "body": "SameSite cookie attribute was causing premature logout in Safari 17."
+  },
+  {
+    "number": 1224,
+    "title": "ci: run the integration suite on pull requests",
+    "author": "sam-oyelaran",
+    "url": "https://github.com/example/app/pull/1224",
+    "labels": ["ci"],
+    "body": "Moves integration tests from nightly to per-PR."
+  },
+  {
+    "number": 1227,
+    "title": "feat(search): add filters for date range and status",
+    "author": "lena-m",
+    "url": "https://github.com/example/app/pull/1227",
+    "labels": ["feature"],
+    "body": "Users can now narrow search results by created date and record status."
+  },
+  {
+    "number": 1230,
+    "title": "refactor: extract notification logic into its own service",
+    "author": "priya-n",
+    "url": "https://github.com/example/app/pull/1230",
+    "labels": [],
+    "body": "No behaviour change. Prepares for the upcoming SMS channel."
+  },
+  {
+    "number": 1233,
+    "title": "fix: correct timezone handling in scheduled exports",
+    "author": "dmitri-k",
+    "url": "https://github.com/example/app/pull/1233",
+    "labels": ["bug"],
+    "body": "Exports scheduled for 9am were firing at 9am UTC regardless of user timezone."
+  },
+  {
+    "number": 1236,
+    "title": "feat(admin): bulk user import from CSV",
+    "author": "sam-oyelaran",
+    "url": "https://github.com/example/app/pull/1236",
+    "labels": ["feature", "admin"],
+    "body": "Admins can upload a CSV to create up to 5,000 users at once."
+  },
+  {
+    "number": 1239,
+    "title": "test: add coverage for the rate limiter",
+    "author": "lena-m",
+    "url": "https://github.com/example/app/pull/1239",
+    "labels": [],
+    "body": "Covers burst and sustained-load cases."
+  },
+  {
+    "number": 1242,
+    "title": "perf: lazy-load report charts to cut initial bundle by 340KB",
+    "author": "priya-n",
+    "url": "https://github.com/example/app/pull/1242",
+    "labels": ["performance"],
+    "body": "Charting library is now code-split and loaded on demand."
+  }
+]
